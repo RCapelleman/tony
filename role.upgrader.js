@@ -1,6 +1,3 @@
-
-var utils = require("utils");
-
 module.exports = {
     run: function (creep) {
         if(creep.memory.working == false && creep.carry.energy == creep.carryCapacity ){

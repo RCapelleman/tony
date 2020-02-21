@@ -1,6 +1,5 @@
 
 var roleBuilder = require("role.builder");
-var utils = require("utils");
 
 
 module.exports = {
