@@ -11,7 +11,7 @@ module.exports = {
         if (creep.memory.working == false) {
             var source = creep.pos.findClosestByPath(FIND_SOURCES);
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(source);
+                creep.moveTo(Game.flags.Flag1);
             }
         }
         else {
@@ -19,6 +19,8 @@ module.exports = {
             if(constructionSite != undefined) {
                 if (creep.build(constructionSite) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(constructionSite);
+                }else{
+                    creep.say('Build!!');
                 }
             }
             else{

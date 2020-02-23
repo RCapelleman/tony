@@ -2,7 +2,6 @@ var roleBuilder = require("role.builder");
 
 module.exports = {
     run: function (creep) {
-
         if(creep.memory.working == false && creep.carry.energy == creep.carryCapacity ){
             creep.memory.working = true;
         }
@@ -23,6 +22,8 @@ module.exports = {
             if (structure != undefined){
                 if(creep.repair(structure) == ERR_NOT_IN_RANGE){
                     creep.moveTo(structure);
+                }else{
+                    creep.say('Repair!!');
                 }
             }
             else{
