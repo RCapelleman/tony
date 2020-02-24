@@ -6,10 +6,10 @@ module.exports = {
         else if(creep.memory.working == true && creep.carry.energy == 0){
             creep.memory.working = false;
         }
-        if (creep.memory.working == false) {
-            var source = creep.pos.findClosestByPath(FIND_SOURCES);
-            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(Game.flags.Flag1);
+        if (creep.memory.working == false) { 
+            var link = Game.rooms["W2N12"].lookForAt('structure', 13, 33)[0];
+            if(creep.withdraw(link, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(Game.flags.link);
             }
         }
         else {

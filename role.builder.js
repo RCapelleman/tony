@@ -11,7 +11,7 @@ module.exports = {
         if (creep.memory.working == false) {
             var source = creep.pos.findClosestByPath(FIND_SOURCES);
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(Game.flags.Flag1);
+                creep.moveTo(Game.flags.source);
             }
         }
         else {

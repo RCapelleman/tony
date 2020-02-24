@@ -1,4 +1,4 @@
-var MIN_WALL_HITS = 3000;
+var MIN_WALL_HITS = 10000;
 
 module.exports = {
     run : function(room){
@@ -6,7 +6,7 @@ module.exports = {
         towers.forEach(tower => {
             var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if (closestHostile) {
-                Game.notify('Enemy creep spotted',180 );
+                Game.notify('Enemy creep spotted',180);
                 tower.attack(closestHostile);
             }
             if(tower.store.getFreeCapacity(RESOURCE_ENERGY) < 500 ){
@@ -21,11 +21,9 @@ module.exports = {
                 });
                 if (closestDamagedWall) {
                    tower.repair(closestDamagedWall);
-                }
-                if (closestDamagedRampart) {
+                }else if (closestDamagedRampart) {
                    tower.repair(closestDamagedRampart);
-                }
-                if (closestDamagedStructure) {
+                }else if (closestDamagedStructure) {
                    tower.repair(closestDamagedStructure)
                 }
             }
