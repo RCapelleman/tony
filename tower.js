@@ -1,4 +1,4 @@
-var MIN_WALL_HITS = 10000;
+var MIN_WALL_HITS = 25000;
 
 module.exports = {
     run : function(room){
@@ -17,14 +17,16 @@ module.exports = {
                     filter: (structure) => structure.hits < MIN_WALL_HITS && structure.structureType == STRUCTURE_RAMPART
                 });
                 var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: (structure) => structure.hits < structure.hitsMax && structure.structureType != STRUCTURE_WALL
+                    filter: (structure) => structure.hits < structure.hitsMax 
+                                            && structure.structureType != STRUCTURE_WALL 
+                                            && structure.structureType != STRUCTURE_RAMPART
                 });
-                if (closestDamagedWall) {
-                   tower.repair(closestDamagedWall);
+                if (closestDamagedStructure) {
+                    tower.repair(closestDamagedStructure)
                 }else if (closestDamagedRampart) {
-                   tower.repair(closestDamagedRampart);
-                }else if (closestDamagedStructure) {
-                   tower.repair(closestDamagedStructure)
+                    tower.repair(closestDamagedRampart);
+                }else if (closestDamagedWall) {
+                   tower.repair(closestDamagedWall);
                 }
             }
         })
