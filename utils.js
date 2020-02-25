@@ -4,100 +4,105 @@ var roleBuilder = require("role.builder");
 var roleRepairer = require("role.repairer");
 var rooms = require("rooms");
 
-var optionsHarvester =  [WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE];
-var optionsOthers =     [WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE];
-var optionsWarriors =   [MOVE,MOVE,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,WORK,WORK];
-var MAX_BUILDER = 1; 
-var MAX_REPAIRER = 0; // Tower is there to repair for the moment
-var MAX_HARVESTER = 3;
-var MAX_UPGRADER = 2;
-var MAX_HARVESTER_U = 2;
-var MAX_WARRIOR = 0;
+const BUILDER = 'builder';
+const REPAIRER = 'repairer';
+const HARVESTER = 'harvester';
+const UPGRADER = 'upgrader';
+const HARVESTER_U = 'harvesterU';
+const WARRIOR = 'warrior';
+const MINOR = 'minor';
 
-var energyVal = [["MOVE", 50],["WORK", 100],["CARRY", 50],["ATTACK", 80],["HEAL", 250],["TOUGH",10], ["CLAIM", 600]];
-
+const roles = ['builder','repairer','harvester','upgrader','harvesterU','warrior','minor'];
+var roomsMap = new Map();
 
 module.exports = {
-    log : function(creep){
-        console.log("name", creep.name);
-        console.log("role", creep.memory.role);
-        console.log("working", creep.memory.working);
-        console.log("position", creep.pos);
-    },
-    cleanDeadCreep: function(){
-        for(let name in Memory.creeps){
-            if(Game.creeps[name] == undefined){
-                delete Memory.creeps[name];
-            }
-        }
-    },
-    giveRoles: function(){
-        for(let name in Game.creeps) {
-          var creep = Game.creeps[name];
-            switch (creep.memory.role) {
-              case 'harvester':
-                roleHarvester.run(creep);
-                break;
-              case 'harvesterU':
-                roleHarvester.harvestUpgrader(creep);
-                break;
-              case 'upgrader':
-                roleUpgrader.run(creep);
-                break;
-              case 'builder':
-                roleBuilder.run(creep);
-                break;
-              case 'repairer':
-                roleRepairer.run(creep);
-                break;
-              case 'minor':
-                roleHarvester.mine(creep);
-                  break;
-              case 'warrior':
-                rooms.attackTop(creep);
-                  break;
-              default:
-                console.log("Role not present :", creep.memory.role);
-            }
-        }
-    },
-    calculateEnegyNecessary: function(array){
-        var energyMap = new Map(energyVal);
-        var sum = 0;
-        array.forEach(e => {
-            sum += energyMap.get(e.toUpperCase());
-        });
-        return sum;
-    },
-    createCreep : function(){
-        var room = Game.rooms["W2N12"];
-        var numeroDeHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'harvester');
-        var numeroDeHarvesterU = _.sum(Game.creeps,  (c) => c.memory.role == 'harvesterU');
-        var options = (numeroDeHarvesters >= MAX_HARVESTER || numeroDeHarvesterU < MAX_HARVESTER_U)? optionsOthers:optionsHarvester;
-        var energyNeeded = this.calculateEnegyNecessary(options);
-
-        if(energyNeeded <= room.energyAvailable){
-            var numeroDeBuilder  = _.sum(Game.creeps,       (c) => c.memory.role == 'builder');
-            var numeroDeRepairer = _.sum(Game.creeps,       (c) => c.memory.role == 'repairer');
-            var numeroDeUpgrader = _.sum(Game.creeps,       (c) => c.memory.role == 'upgrader');
-            var numeroDeWarrior =  _.sum(Game.creeps,       (c) => c.memory.role == 'warrior');
-
-            var role = 
-                numeroDeHarvesters < MAX_HARVESTER  ? 'harvester':
-                numeroDeBuilder    < MAX_BUILDER    ? 'builder': 
-                numeroDeRepairer   < MAX_REPAIRER   ? 'repairer':
-                numeroDeHarvesterU < MAX_HARVESTER_U? 'harvesterU':
-                numeroDeWarrior    < MAX_WARRIOR    ? 'warrior':
-                numeroDeUpgrader   < MAX_UPGRADER   ? 'upgrader': 'none';
-            if(role=='warrior'){
-              options = optionsWarriors;
-            }
-            if(role != 'none'){
-                Game.spawns.Spawn1.createCreep(options,undefined,{role:role,working:false});
-                console.log("Screep with role="+ role+" created. Energy consummed ="+ energyNeeded+", energy remaining =", room.energyAvailable);
-                console.log("Harvester = "+numeroDeHarvesters+", Builder = "+numeroDeBuilder+", Repairer= "+numeroDeRepairer+", Upgrader ="
-                    +numeroDeUpgrader+", HarversterU ="+numeroDeHarvesterU), "Warriors ="+numeroDeHarvesterU;
-            }
-        }
+  initRooms: function(rooms){
+    if(undefined != rooms){
+      roomsMap.set("W2N12",[1,0,3,2,2,0,0]);
     }
+  },
+  cleanDeadCreep: function(){
+      for(let name in Memory.creeps){
+          if(Game.creeps[name] == undefined){
+              delete Memory.creeps[name];
+          }
+      }
+  },
+  giveRoles: function(){
+      for(let name in Game.creeps) {
+        var creep = Game.creeps[name];
+          switch (creep.memory.role) {
+            case HARVESTER:
+              roleHarvester.run(creep);
+              break;
+            case HARVESTER_U:
+              roleHarvester.harvestUpgrader(creep);
+              break;
+            case UPGRADER:
+              roleUpgrader.run(creep);
+              break;
+            case BUILDER:
+              roleBuilder.run(creep);
+              break;
+            case REPAIRER:
+              roleRepairer.run(creep);
+              break;
+            case MINOR:
+              roleHarvester.mine(creep);
+                break;
+            case WARRIOR:
+              rooms.attackTop(creep);
+                break;
+            default:
+              console.log("Role not present :", creep.memory.role);
+              roleBuilder.run(creep);
+          }
+      }
+  },
+  createCreep : function(room){
+      var creepsValues = roomsMap.get(room);
+      var role = 
+          _.sum(Game.creeps,   (c) => c.memory.role == HARVESTER)   < creepsValues[roles.indexOf(HARVESTER)]   ? HARVESTER:
+          _.sum(Game.creeps,   (c) => c.memory.role == BUILDER)     < creepsValues[roles.indexOf(BUILDER)]     ? BUILDER: 
+          _.sum(Game.creeps,   (c) => c.memory.role == REPAIRER)    < creepsValues[roles.indexOf(REPAIRER)]    ? REPAIRER:
+          _.sum(Game.creeps,   (c) => c.memory.role == HARVESTER_U) < creepsValues[roles.indexOf(HARVESTER_U)] ? HARVESTER_U:
+          _.sum(Game.creeps,   (c) => c.memory.role == WARRIOR)     < creepsValues[roles.indexOf(WARRIOR)]     ? WARRIOR:
+          _.sum(Game.creeps,   (c) => c.memory.role == UPGRADER)    < creepsValues[roles.indexOf(UPGRADER)]    ? UPGRADER: undefined;
+
+      var options = this.getBodyParts(role);
+      if(undefined != role && undefined == Game.spawns.Spawn1.spawning 
+          && this.calculateEnegyNecessary(options) < Game.rooms[room].energyAvailable){
+            
+        Game.spawns.Spawn1.createCreep(options,undefined,{role:role,working:false});
+        console.log("Screep with role="+ role+" created. Energy remaining =", Game.rooms[room].energyAvailable);
+        console.log("Harvester = "  +_.sum(Game.creeps,   (c) => c.memory.role == HARVESTER)
+          +", Builder = "   +_.sum(Game.creeps,   (c) => c.memory.role == BUILDER)
+          +", Repairer= "   +_.sum(Game.creeps,   (c) => c.memory.role == REPAIRER)
+          +", Upgrader ="   +_.sum(Game.creeps,   (c) => c.memory.role == UPGRADER)
+          +", HarversterU ="+_.sum(Game.creeps,   (c) => c.memory.role == HARVESTER_U))
+          +", Warriors ="   +_.sum(Game.creeps,   (c) => c.memory.role == WARRIOR);
+      }
+  },
+  calculateEnegyNecessary: function(array){
+      var energyMap = new Map([["MOVE", 50],["WORK", 100],["CARRY", 50],["ATTACK", 80],["HEAL", 250],["TOUGH",10], ["CLAIM", 600]]);
+      var sum = 0;
+      array.forEach(e => {
+          sum += energyMap.get(e.toUpperCase());
+      });
+      return sum;
+  },
+  getBodyParts: function(role){
+    switch (role) {
+      case HARVESTER:
+      case HARVESTER_U:
+        return [WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE];                 
+        break;
+      case WARRIOR:
+        return [MOVE,MOVE,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,TOUGH,WORK,WORK,WORK,WORK];                 
+        break;
+      default:
+        return [WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE];   
+        break;
+    }
+  }
 };

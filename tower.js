@@ -1,4 +1,4 @@
-var MIN_WALL_HITS = 25000;
+var MIN_WALL_HITS = 10000;
 
 module.exports = {
     run : function(room){
@@ -6,27 +6,29 @@ module.exports = {
         towers.forEach(tower => {
             var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if (closestHostile) {
-                Game.notify('Enemy creep spotted',180);
-                tower.attack(closestHostile);
-            }
-            if(tower.store.getFreeCapacity(RESOURCE_ENERGY) < 500 ){
-                var closestDamagedWall = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: (structure) => structure.hits < MIN_WALL_HITS && structure.structureType == STRUCTURE_WALL
-                });
-                var closestDamagedRampart = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: (structure) => structure.hits < MIN_WALL_HITS && structure.structureType == STRUCTURE_RAMPART
-                });
-                var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: (structure) => structure.hits < structure.hitsMax 
-                                            && structure.structureType != STRUCTURE_WALL 
-                                            && structure.structureType != STRUCTURE_RAMPART
-                });
-                if (closestDamagedStructure) {
-                    tower.repair(closestDamagedStructure)
-                }else if (closestDamagedRampart) {
-                    tower.repair(closestDamagedRampart);
-                }else if (closestDamagedWall) {
-                   tower.repair(closestDamagedWall);
+                if(tower.attack(closestHostile) == ERR_NOT_IN_RANGE) {
+                    console.log("Not in range of tower");
+                }
+            }else{
+                if(tower.store.getFreeCapacity(RESOURCE_ENERGY) < 500 ){
+                    var closestDamagedWall = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                        filter: (structure) => structure.hits < MIN_WALL_HITS && structure.structureType == STRUCTURE_WALL
+                    });
+                    var closestDamagedRampart = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                        filter: (structure) => structure.hits < MIN_WALL_HITS && structure.structureType == STRUCTURE_RAMPART
+                    });
+                    var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                        filter: (structure) => structure.hits < structure.hitsMax 
+                                                && structure.structureType != STRUCTURE_WALL 
+                                                && structure.structureType != STRUCTURE_RAMPART
+                    });
+                    if (closestDamagedStructure) {
+                        tower.repair(closestDamagedStructure)
+                    }else if (closestDamagedRampart) {
+                        tower.repair(closestDamagedRampart);
+                    }else if (closestDamagedWall) {
+                       tower.repair(closestDamagedWall);
+                    }
                 }
             }
         })
